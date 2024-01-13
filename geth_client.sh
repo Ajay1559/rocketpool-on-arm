@@ -119,10 +119,10 @@ EOF
  After=network.target
 
  [Service]
- EnvironmentFile=/etc/ethereum/execution-chain.conf
+ EnvironmentFile=${CONF_FOLDER}${USERNAME}.conf
  ExecStart=/usr/bin/geth $ARGS
  Restart=always
- User=execution-chain
+ User=${USERNAME}
  KillSignal=SIGTERM
  TimeoutStopSec=600
 
