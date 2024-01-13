@@ -30,8 +30,8 @@ help()
 {
     usage_info
     echo
-    echo "  {-i|--install} servicename         -- Install servicename and directory"
-    echo "  {-d|--delete} servicename          -- Delete servicename and directory"
+    echo "  {-i|--install} servicename      -- Install servicename and directory"
+    echo "  {-d|--delete} servicename       -- Delete servicename and directory"
     echo "  {-h|--help}                     -- Print this help message and exit"
 #   echo "  {-V|--version}                  -- Print version information and exit"
     exit 0
@@ -97,15 +97,17 @@ if [ $INSTALL ]; then
         echo "File $SERVICE_NAME.conf already exists!"
     else
         cat << EOF >> $SERVICE_NAME.conf
-ARGS="--datadir /home/$SERVICE_NAME/.erigon \\
-  --chain=mainnet \\
-  --metrics \\
-  --metrics.port 5050 \\
+ARGS="beacon \\
+  --network mainnet \\
+  --datadir /home/${SERVICE_NAME}/.ethereum \\
+  --eth1 \\
   --http \\
-  --http.addr 0.0.0.0 \\
-  --ws \\
-  --authrpc.jwtsecret=/etc/ethereum/jwtsecret \\
-  --private.api.addr localhost:8092" 
+  --metrics \\
+  --execution-endpoint http://127.0.0.1:8551 \\
+  --execution-jwt /etc/ethereum/jwtsecret \\
+  --builder http://127.0.0.1:18550 \\
+  --checkpoint-sync-url https://beaconstate.ethstaker.cc \\
+  --prune-payloads false"
 EOF
 
     sudo mv $SERVICE_NAME.conf $CONF_FOLDER
@@ -117,13 +119,12 @@ EOF
     else
         cat << EOF >> $SERVICE_NAME.service
 [Unit]
-Description=Ethereum Erigon client daemon in Archive mode
+Description=Lighthouse Beacon chain daemon
 After=network.target
 
 [Service]
-Environment="GODEBUG=netdns=go"
 EnvironmentFile=${CONF_FOLDER}${SERVICE_NAME}.conf
-ExecStart=/usr/bin/erigon $ARGS
+ExecStart=/usr/bin/lighthouse $ARGS
 Restart=always
 User=${SERVICE_NAME}
 KillSignal=SIGTERM
@@ -142,6 +143,4 @@ elif [ $DELETE ]; then
     sudo rm -rf /home/$SERVICE_NAME/ ${CONF_FOLDER}${SERVICE_NAME}.conf ${SERVICE_FOLDER}${SERVICE_NAME}.service
 fi
 
-
 sudo systemctl daemon-reload
-
