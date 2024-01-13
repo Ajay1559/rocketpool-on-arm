@@ -120,7 +120,7 @@ EOF
 
  [Service]
  EnvironmentFile=${CONF_FOLDER}${USERNAME}.conf
- ExecStart=/usr/bin/geth $ARGS
+ ExecStart=/usr/bin/geth \$ARGS
  Restart=always
  User=${USERNAME}
  KillSignal=SIGTERM

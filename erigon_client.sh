@@ -123,7 +123,7 @@ After=network.target
 [Service]
 Environment="GODEBUG=netdns=go"
 EnvironmentFile=${CONF_FOLDER}${SERVICE_NAME}.conf
-ExecStart=/usr/bin/erigon $ARGS
+ExecStart=/usr/bin/erigon \$ARGS
 Restart=always
 User=${SERVICE_NAME}
 KillSignal=SIGTERM

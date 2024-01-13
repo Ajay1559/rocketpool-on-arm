@@ -124,7 +124,7 @@ After=network.target
 
 [Service]
 EnvironmentFile=${CONF_FOLDER}${SERVICE_NAME}.conf
-ExecStart=/usr/bin/lighthouse $ARGS
+ExecStart=/usr/bin/lighthouse \$ARGS
 Restart=always
 User=${SERVICE_NAME}
 KillSignal=SIGTERM
