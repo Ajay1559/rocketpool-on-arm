@@ -4,12 +4,13 @@ arg0=$(basename "$0" .sh)
 blnk=$(echo "$arg0" | sed 's/./ /g')
 CONF_FOLDER=/etc/ethereum/
 SERVICE_FOLDER=/usr/lib/systemd/system/
-MAX_ARGS=2
+MAX_ARGS=4
 
 usage_info()
 {
     echo "Usage: $arg0 [{-i|--install} username] \\"
     echo "       $blnk [{-d|--delete} username] \\"
+    echo "       $blnk [{-n|--network} networkname] \\"
     echo "       $blnk [-h|--help]"
 }
 
@@ -32,6 +33,7 @@ help()
     echo
     echo "  {-i|--install} username         -- Install username and directory"
     echo "  {-d|--delete} username          -- Delete username and directory"
+    echo "  {-n|--network} networkname      -- Use specific network given"
     echo "  {-h|--help}                     -- Print this help message and exit"
 #   echo "  {-V|--version}                  -- Print version information and exit"
     exit 0
@@ -61,6 +63,12 @@ flags()
             [ $# = 0 ] && error "No delete username specified"
             export DELETE=true
             export USERNAME=$1
+            shift
+            OPTCOUNT=$(($OPTCOUNT + 2));;
+        (-n|--network)
+            shift
+            [ $# = 0 ] && error "No network specified"
+            export NETWORK_NAME=$1
             shift
             OPTCOUNT=$(($OPTCOUNT + 2));;
         (-h|--help)
@@ -98,7 +106,7 @@ if [ $INSTALL ]; then
     else
         cat << EOF >> $USERNAME.conf
 ARGS="--datadir /home/$USERNAME/.ethereum \\
-  --mainnet \\
+  --${NETWORK_NAME} \\
   --metrics \\
   --metrics.expensive \\
   --pprof \\

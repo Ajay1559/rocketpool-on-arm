@@ -4,12 +4,13 @@ arg0=$(basename "$0" .sh)
 blnk=$(echo "$arg0" | sed 's/./ /g')
 CONF_FOLDER=/etc/ethereum/
 SERVICE_FOLDER=/usr/lib/systemd/system/
-MAX_ARGS=2
+MAX_ARGS=4
 
 usage_info()
 {
     echo "Usage: $arg0 [{-i|--install} servicename] \\"
     echo "       $blnk [{-d|--delete} servicename] \\"
+    echo "       $blnk [{-n|--network} networkname] \\"
     echo "       $blnk [-h|--help]"
 }
 
@@ -32,6 +33,7 @@ help()
     echo
     echo "  {-i|--install} servicename      -- Install servicename and directory"
     echo "  {-d|--delete} servicename       -- Delete servicename and directory"
+    echo "  {-n|--network} networkname      -- Use specific network given"
     echo "  {-h|--help}                     -- Print this help message and exit"
 #   echo "  {-V|--version}                  -- Print version information and exit"
     exit 0
@@ -63,6 +65,12 @@ flags()
             export SERVICE_NAME=$1
             shift
             OPTCOUNT=$(($OPTCOUNT + 2));;
+        (-n|--network)
+            shift
+            [ $# = 0 ] && error "No network specified"
+            export NETWORK_NAME=$1
+            shift
+            OPTCOUNT=$(($OPTCOUNT + 2));;
         (-h|--help)
             help;;
 #       (-V|--version)
@@ -92,13 +100,18 @@ if [ $INSTALL ]; then
     sudo mkdir -p /home/$SERVICE_NAME/.ethereum
     sudo chown -R $SERVICE_NAME:$SERVICE_NAME /home/$SERVICE_NAME/
 
+    if [[ $NETWORK_NAME == "holesky" ]]; then
+        export SYNC_URL=https://holesky.beaconstate.ethstaker.cc
+    else
+        export SYNC_URL=https://beaconstate.ethstaker.cc
+    fi
     # create user config
     if [ -e $SERVICE_NAME.conf ]; then
         echo "File $SERVICE_NAME.conf already exists!"
     else
         cat << EOF >> $SERVICE_NAME.conf
 ARGS="beacon \\
-  --network mainnet \\
+  --network ${NETWORK_NAME} \\
   --datadir /home/${SERVICE_NAME}/.ethereum \\
   --eth1 \\
   --http \\
@@ -106,7 +119,7 @@ ARGS="beacon \\
   --execution-endpoint http://127.0.0.1:8551 \\
   --execution-jwt /etc/ethereum/jwtsecret \\
   --builder http://127.0.0.1:18550 \\
-  --checkpoint-sync-url https://beaconstate.ethstaker.cc \\
+  --checkpoint-sync-url ${SYNC_URL} \\
   --prune-payloads false"
 EOF
 
