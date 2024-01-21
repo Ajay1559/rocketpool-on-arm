@@ -2,8 +2,11 @@
 
 arg0=$(basename "$0" .sh)
 blnk=$(echo "$arg0" | sed 's/./ /g')
-CONF_FOLDER=/etc/ethereum/
+CONF_FOLDER=/etc/ethereum
 SERVICE_FOLDER=/usr/lib/systemd/system/
+INPUT_DIR="input"
+OUTPUT_DIR="output"
+MIN_ARGS=1
 MAX_ARGS=4
 
 usage_info()
@@ -43,6 +46,10 @@ if [ $# -gt $MAX_ARGS ]; then
     echo "Error: Too many arguments."
     usage_info
     exit 1
+elif [ $# -lt $MIN_ARGS ]; then
+    echo "Error: Too few arguments."
+    usage_info
+    exit 1
 fi
 
 flags()
@@ -55,14 +62,14 @@ flags()
             shift
             [ $# = 0 ] && error "No install servicename specified"
             export INSTALL=true
-            export SERVICE_NAME=$1
+            export service_name=$1
             shift
             OPTCOUNT=$(($OPTCOUNT + 2));;
         (-d|--delete)
             shift
             [ $# = 0 ] && error "No delete servicename specified"
             export DELETE=true
-            export SERVICE_NAME=$1
+            export service_name=$1
             shift
             OPTCOUNT=$(($OPTCOUNT + 2));;
         (-n|--network)
@@ -86,6 +93,28 @@ flags()
 #    echo "OPTCOUNT=$OPTCOUNT" >&2
 }
 
+copy_file () {
+    input_file=$INPUT_DIR/$1
+    output_file=$OUTPUT_DIR/$1
+
+    if [ -f $input_file ]; then
+        if [ -e $output_file ]; then
+            echo "File $output_file already exists!"
+            exit 1
+        else
+            sed "s|\${NETWORK_NAME}|$network_name|g; \
+                s|\${USER_NAME}|$service_name|g; \
+                s|\${CONF_FOLDER}|$CONF_FOLDER|g; \
+                s|\${SYNC_URL}|$SYNC_URL|g; \
+                s|\${SERVICE_NAME}|$service_name|g" \
+                "$input_file" > "$output_file"
+        fi
+    else
+        echo "File $input_file does not exist!"
+        exit 1
+    fi
+}
+
 flags "$@"
 #echo "DEBUG-2: [$*]" >&2
 shift $OPTCOUNT
@@ -94,66 +123,28 @@ shift $OPTCOUNT
 
 
 if [ $INSTALL ]; then
-    # create sandbox user
-    echo "installing $SERVICE_NAME"
-    sudo useradd -r -s /sbin/nologin $SERVICE_NAME
-    sudo mkdir -p /home/$SERVICE_NAME/.ethereum
-    sudo chown -R $SERVICE_NAME:$SERVICE_NAME /home/$SERVICE_NAME/
+    # create sandboxed service user
+    # echo "installing service $service_name"
+    # sudo useradd -r -s /sbin/nologin $service_name
+    # sudo mkdir -p /home/$service_name/.ethereum
+    # sudo chown -R $service_name:$service_name /home/$service_name/
 
     if [[ $NETWORK_NAME == "holesky" ]]; then
         export SYNC_URL=https://holesky.beaconstate.ethstaker.cc
     else
         export SYNC_URL=https://beaconstate.ethstaker.cc
     fi
-    # create user config
-    if [ -e $SERVICE_NAME.conf ]; then
-        echo "File $SERVICE_NAME.conf already exists!"
-    else
-        cat << EOF >> $SERVICE_NAME.conf
-ARGS="beacon \\
-  --network ${NETWORK_NAME} \\
-  --datadir /home/${SERVICE_NAME}/.ethereum \\
-  --eth1 \\
-  --http \\
-  --metrics \\
-  --execution-endpoint http://127.0.0.1:8551 \\
-  --execution-jwt /etc/ethereum/jwtsecret \\
-  --builder http://127.0.0.1:18550 \\
-  --checkpoint-sync-url ${SYNC_URL} \\
-  --prune-payloads false"
-EOF
+    # create config file
+    copy_file "$service_name.conf"
 
-    sudo mv $SERVICE_NAME.conf $CONF_FOLDER
-    fi
+    # create service file
+    copy_file "$service_name.service"
 
-    # create user service
-    if [ -e $SERVICE_NAME.service ]; then
-	    echo "File $SERVICE_NAME.service already exists!"
-    else
-        cat << EOF >> $SERVICE_NAME.service
-[Unit]
-Description=Lighthouse Beacon chain daemon
-After=network.target
-
-[Service]
-EnvironmentFile=${CONF_FOLDER}${SERVICE_NAME}.conf
-ExecStart=/usr/bin/lighthouse \$ARGS
-Restart=always
-User=${SERVICE_NAME}
-KillSignal=SIGTERM
-TimeoutStopSec=600
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-    sudo mv $SERVICE_NAME.service $SERVICE_FOLDER
-    fi
 elif [ $DELETE ]; then
     # del sandbox user
-    echo "deleting $SERVICE_NAME"
-    sudo userdel $SERVICE_NAME
-    sudo rm -rf /home/$SERVICE_NAME/ ${CONF_FOLDER}${SERVICE_NAME}.conf ${SERVICE_FOLDER}${SERVICE_NAME}.service
+    echo "deleting $service_name"
+    sudo userdel $service_name
+    sudo rm -rf /home/$service_name/ ${CONF_FOLDER}/${service_name}.conf ${SERVICE_FOLDER}${service_name}.service
 fi
 
-sudo systemctl daemon-reload
+#sudo systemctl daemon-reload
