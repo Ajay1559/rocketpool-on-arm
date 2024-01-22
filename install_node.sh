@@ -4,10 +4,11 @@ arg0=$(basename "$0" .sh)
 blnk=$(echo "$arg0" | sed 's/./ /g')
 CONF_FOLDER=/etc/ethereum
 SERVICE_FOLDER=/usr/lib/systemd/system/
+network_name="mainnet"
 INPUT_DIR="input"
 OUTPUT_DIR="output"
 MIN_ARGS=1
-MAX_ARGS=4
+MAX_ARGS=6
 
 usage_info()
 {
@@ -37,6 +38,7 @@ help()
     echo "  {-i|--install} servicename      -- Install servicename and directory"
     echo "  {-d|--delete} servicename       -- Delete servicename and directory"
     echo "  {-n|--network} networkname      -- Use specific network given"
+    echo "  {-c|--client} clientname        -- Use given client config/exe"
     echo "  {-h|--help}                     -- Print this help message and exit"
 #   echo "  {-V|--version}                  -- Print version information and exit"
     exit 0
@@ -75,7 +77,13 @@ flags()
         (-n|--network)
             shift
             [ $# = 0 ] && error "No network specified"
-            export NETWORK_NAME=$1
+            export network_name=$1
+            shift
+            OPTCOUNT=$(($OPTCOUNT + 2));;
+        (-c|--client)
+            shift
+            [ $# = 0 ] && error "No client specified [geth|lighthouse-beacon]"
+            export client_name=$1
             shift
             OPTCOUNT=$(($OPTCOUNT + 2));;
         (-h|--help)
@@ -95,7 +103,7 @@ flags()
 
 copy_file () {
     input_file=$INPUT_DIR/$1
-    output_file=$OUTPUT_DIR/$1
+    output_file=$OUTPUT_DIR/$2
 
     if [ -f $input_file ]; then
         if [ -e $output_file ]; then
@@ -129,16 +137,16 @@ if [ $INSTALL ]; then
     # sudo mkdir -p /home/$service_name/.ethereum
     # sudo chown -R $service_name:$service_name /home/$service_name/
 
-    if [[ $NETWORK_NAME == "holesky" ]]; then
+    if [[ $network_name == "holesky" ]]; then
         export SYNC_URL=https://holesky.beaconstate.ethstaker.cc
     else
         export SYNC_URL=https://beaconstate.ethstaker.cc
     fi
     # create config file
-    copy_file "$service_name.conf"
+    copy_file $client_name.conf $service_name.conf
 
     # create service file
-    copy_file "$service_name.service"
+    copy_file $client_name.service $service_name.service
 
 elif [ $DELETE ]; then
     # del sandbox user

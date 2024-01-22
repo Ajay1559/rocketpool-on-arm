@@ -3,7 +3,7 @@ Description=Lighthouse Beacon chain daemon
 After=network.target
 
 [Service]
-EnvironmentFile=${CONF_FOLDER}${SERVICE_NAME}.conf
+EnvironmentFile=${CONF_FOLDER}/${SERVICE_NAME}.conf
 ExecStart=/usr/bin/lighthouse \$ARGS
 Restart=always
 User=${SERVICE_NAME}
