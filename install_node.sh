@@ -101,6 +101,15 @@ flags()
 #    echo "OPTCOUNT=$OPTCOUNT" >&2
 }
 
+add_user () {
+    user_name=$1
+    # create sandboxed service user
+    echo "installing service as $user_name"
+    sudo useradd -r -s /sbin/nologin $user_name
+    sudo mkdir -p /home/$user_name/.ethereum
+    sudo chown -R $user_name:$user_name /home/$user_name/
+}
+
 copy_file () {
     input_file=$INPUT_DIR/$1
     output_file=$OUTPUT_DIR/$2
@@ -131,11 +140,10 @@ shift $OPTCOUNT
 
 
 if [ $INSTALL ]; then
-    # create sandboxed service user
-    # echo "installing service $service_name"
-    # sudo useradd -r -s /sbin/nologin $service_name
-    # sudo mkdir -p /home/$service_name/.ethereum
-    # sudo chown -R $service_name:$service_name /home/$service_name/
+    # if user does not exist create them
+    if ! [ -e "/home/$service_name" ]; then
+        add_user $service_name
+    fi
 
     if [[ $network_name == "holesky" ]]; then
         export SYNC_URL=https://holesky.beaconstate.ethstaker.cc
@@ -155,4 +163,4 @@ elif [ $DELETE ]; then
     sudo rm -rf /home/$service_name/ ${CONF_FOLDER}/${service_name}.conf ${SERVICE_FOLDER}${service_name}.service
 fi
 
-#sudo systemctl daemon-reload
+sudo systemctl daemon-reload

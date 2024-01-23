@@ -1,0 +1,10 @@
+# CONF_FOLDER = /etc/default
+# Default Port for services
+# geth 8551: (for concensus client)
+# lighthouse: 8545 (for execution client)
+# lighthouse-beacon: 5052 (for validator)
+# mev: 18550
+
+TARGET=[target_name]
+LOCAL_PORT=[port]
+REMOTE_PORT=[port]
