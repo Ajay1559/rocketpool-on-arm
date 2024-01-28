@@ -10,3 +10,22 @@ sudo dd bs=1M if=Downloads/ethonarm_rock5b_23.11.00.img of=/dev/sdb conv=fdatasy
 ** validator -> geth: The default port is 8545
 ** validator -> beacon: The default port is 5052
 ** beacon -> mev: The default port is 18550
+
+
+== sed ==
+* http://netjunky.net/sed-replace-path-with-slash-separators/
+* https://unix.stackexchange.com/questions/268640/make-multiple-edits-with-a-single-call-to-sed
+
+== bash ==
+* https://stackoverflow.com/questions/64257286/giving-a-bash-script-the-option-to-accept-flags-like-a-command
+* https://tldp.org/LDP/abs/html/complexfunct.html
+
+== Rocket Pool ==
+=== Configuring the Smartnode ===
+* https://docs.rocketpool.net/guides/node/config-native.html
+
+===Setting up Node Wallet & Starting Rocket Pool ===
+* https://docs.rocketpool.net/guides/node/starting-rp.html
+
+=== Updating the Smartnode Stack ===
+* https://docs.rocketpool.net/guides/node/updates.html#updating-the-smartnode-stack

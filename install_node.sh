@@ -3,7 +3,7 @@
 arg0=$(basename "$0" .sh)
 blnk=$(echo "$arg0" | sed 's/./ /g')
 CONF_FOLDER=/etc/ethereum
-SERVICE_FOLDER=/usr/lib/systemd/system/
+SERVICE_FOLDER=/usr/lib/systemd/system
 network_name="mainnet"
 INPUT_DIR="input"
 OUTPUT_DIR="output"
@@ -15,6 +15,7 @@ usage_info()
     echo "Usage: $arg0 [{-i|--install} servicename] \\"
     echo "       $blnk [{-d|--delete} servicename] \\"
     echo "       $blnk [{-n|--network} networkname] \\"
+    echo "       $blnk [{-c|--client} clientname] \\"
     echo "       $blnk [-h|--help]"
 }
 
@@ -123,8 +124,10 @@ copy_file () {
                 s|\${USER_NAME}|$service_name|g; \
                 s|\${CONF_FOLDER}|$CONF_FOLDER|g; \
                 s|\${SYNC_URL}|$SYNC_URL|g; \
-                s|\${SERVICE_NAME}|$service_name|g" \
-                "$input_file" > "$output_file"
+                s|\${SERVICE_NAME}|$service_name|g;" \
+                $input_file > "$output_file"
+
+	    sudo mv $output_file $3/$2
         fi
     else
         echo "File $input_file does not exist!"
@@ -133,11 +136,7 @@ copy_file () {
 }
 
 flags "$@"
-#echo "DEBUG-2: [$*]" >&2
 shift $OPTCOUNT
-#echo "DEBUG-3: [$*]" >&2
-
-
 
 if [ $INSTALL ]; then
     # if user does not exist create them
@@ -151,10 +150,10 @@ if [ $INSTALL ]; then
         export SYNC_URL=https://beaconstate.ethstaker.cc
     fi
     # create config file
-    copy_file $client_name.conf $service_name.conf
+    copy_file $client_name.conf $service_name.conf $CONF_FOLDER
 
     # create service file
-    copy_file $client_name.service $service_name.service
+    copy_file $client_name.service $service_name.service $SERVICE_FOLDER
 
 elif [ $DELETE ]; then
     # del sandbox user

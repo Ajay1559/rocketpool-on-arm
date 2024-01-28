@@ -5,6 +5,6 @@
 # lighthouse-beacon: 5052 (for validator)
 # mev: 18550
 
-TARGET=[target_name]
+TARGET=[target_hostname]
 LOCAL_PORT=[port]
 REMOTE_PORT=[port]
