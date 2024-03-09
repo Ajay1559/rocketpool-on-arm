@@ -12,10 +12,9 @@ MAX_ARGS=6
 
 usage_info()
 {
-    echo "Usage: $arg0 [{-i|--install} servicename] \\"
+    echo "Usage: $arg0 [{-i|--install} servicename $blnk [{-n|--network} networkname] $blnk [{-c|--client} clientname]] \\"
     echo "       $blnk [{-d|--delete} servicename] \\"
-    echo "       $blnk [{-n|--network} networkname] \\"
-    echo "       $blnk [{-c|--client} clientname] \\"
+    echo "       $blnk [{-r|--rename} old_servicename new_servicename] \\"
     echo "       $blnk [-h|--help]"
 }
 
@@ -37,9 +36,10 @@ help()
     usage_info
     echo
     echo "  {-i|--install} servicename      -- Install servicename and directory"
+    echo "  {-n|--network} networkname      -- Use specific network given (when installing)"
+    echo "  {-c|--client} clientname        -- Use given client config/exe (when installing)"
     echo "  {-d|--delete} servicename       -- Delete servicename and directory"
-    echo "  {-n|--network} networkname      -- Use specific network given"
-    echo "  {-c|--client} clientname        -- Use given client config/exe"
+    echo "  {-r|--rename} old_name new_name -- Rename old_servicename to new_servicename"
     echo "  {-h|--help}                     -- Print this help message and exit"
 #   echo "  {-V|--version}                  -- Print version information and exit"
     exit 0
@@ -68,13 +68,6 @@ flags()
             export service_name=$1
             shift
             OPTCOUNT=$(($OPTCOUNT + 2));;
-        (-d|--delete)
-            shift
-            [ $# = 0 ] && error "No delete servicename specified"
-            export DELETE=true
-            export service_name=$1
-            shift
-            OPTCOUNT=$(($OPTCOUNT + 2));;
         (-n|--network)
             shift
             [ $# = 0 ] && error "No network specified"
@@ -85,6 +78,20 @@ flags()
             shift
             [ $# = 0 ] && error "No client specified [geth|lighthouse-beacon]"
             export client_name=$1
+            shift
+            OPTCOUNT=$(($OPTCOUNT + 2));;
+        (-d|--delete)
+            shift
+            [ $# = 0 ] && error "No delete servicename specified"
+            export DELETE=true
+            export service_name=$1
+            shift
+            OPTCOUNT=$(($OPTCOUNT + 2));;
+        (-r|--rename)
+            shift
+            [ $# != 2 ] && error "No rename servicenames specified"
+            export service_name=$1
+            export new_service_name=$2
             shift
             OPTCOUNT=$(($OPTCOUNT + 2));;
         (-h|--help)

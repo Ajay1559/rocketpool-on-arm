@@ -2,6 +2,7 @@
 sudo dd bs=1M if=Downloads/ethonarm_rock5b_23.11.00.img of=/dev/sdb conv=fdatasync status=progress
 
 == SSH TUNNELS ==
+(so far nimbus is the same as lighthouse)
 * https://linuxize.com/post/how-to-setup-ssh-tunneling/
 * https://gist.github.com/drmalex07/c0f9304deea566842490
 * `ss -lntp`
@@ -29,3 +30,9 @@ sudo dd bs=1M if=Downloads/ethonarm_rock5b_23.11.00.img of=/dev/sdb conv=fdatasy
 
 === Updating the Smartnode Stack ===
 * https://docs.rocketpool.net/guides/node/updates.html#updating-the-smartnode-stack
+
+==== Useful Aliases (LINKz) ====
+* GREP: https://stackoverflow.com/a/14871646
+* disk usage: `du -hs * | sort -hr`
+* list deleted file still on disk: `lsof | grep -c DEL`
+* do I need a restart: `cat /var/run/reboot-required` & `cat /var/run/reboot-required.pkgs`
