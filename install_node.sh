@@ -65,7 +65,7 @@ flags()
             shift
             [ $# = 0 ] && error "No install servicename specified"
             export INSTALL=true
-            export service_name=$1
+            export user_name=$1
             shift
             OPTCOUNT=$(($OPTCOUNT + 2));;
         (-n|--network)
@@ -84,14 +84,14 @@ flags()
             shift
             [ $# = 0 ] && error "No delete servicename specified"
             export DELETE=true
-            export service_name=$1
+            export user_name=$1
             shift
             OPTCOUNT=$(($OPTCOUNT + 2));;
         (-r|--rename)
             shift
             [ $# != 2 ] && error "No rename servicenames specified"
-            export service_name=$1
-            export new_service_name=$2
+            export user_name=$1
+            export new_user_name=$2  
             shift
             OPTCOUNT=$(($OPTCOUNT + 2));;
         (-h|--help)
@@ -128,10 +128,10 @@ copy_file () {
             exit 1
         else
             sed "s|\${NETWORK_NAME}|$network_name|g; \
-                s|\${USER_NAME}|$service_name|g; \
+                s|\${USER_NAME}|$user_name|g; \
                 s|\${CONF_FOLDER}|$CONF_FOLDER|g; \
                 s|\${SYNC_URL}|$SYNC_URL|g; \
-                s|\${SERVICE_NAME}|$service_name|g;" \
+                s|\${CLIENT_NAME}|$client_name|g;" \
                 $input_file > "$output_file"
 
 	    sudo mv $output_file $3/$2
@@ -147,8 +147,8 @@ shift $OPTCOUNT
 
 if [ $INSTALL ]; then
     # if user does not exist create them
-    if ! [ -e "/home/$service_name" ]; then
-        add_user $service_name
+    if ! [ -e "/home/$user_name" ]; then
+        add_user $user_name
     fi
 
     if [[ $network_name == "holesky" ]]; then
@@ -157,16 +157,16 @@ if [ $INSTALL ]; then
         export SYNC_URL=https://beaconstate.ethstaker.cc
     fi
     # create config file
-    copy_file $client_name.conf $service_name.conf $CONF_FOLDER
+    copy_file $client_name.conf $user_name.conf $CONF_FOLDER
 
     # create service file
-    copy_file $client_name.service $service_name.service $SERVICE_FOLDER
+    copy_file $client_name.service $user_name.service $SERVICE_FOLDER
 
 elif [ $DELETE ]; then
     # del sandbox user
-    echo "deleting $service_name"
-    sudo userdel $service_name
-    sudo rm -rf /home/$service_name/ ${CONF_FOLDER}/${service_name}.conf ${SERVICE_FOLDER}${service_name}.service
+    echo "deleting $user_name"
+    sudo userdel $user_name
+    sudo rm -rf /home/$user_name/ ${CONF_FOLDER}/${client_name}.conf ${SERVICE_FOLDER}${client_name}.service
 fi
 
 sudo systemctl daemon-reload

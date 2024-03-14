@@ -3,11 +3,11 @@ Description=Nethermind Ethereum Daemon
 After=network.target
 
 [Service]
-User=${SERVICE_NAME}
-EnvironmentFile=${CONF_FOLDER}/${SERVICE_NAME}.conf
+User=${USER_NAME}
+EnvironmentFile=${CONF_FOLDER}/${CLIENT_NAME}.conf
 ExecStart=/usr/bin/nethermind \$ARGS
 Restart=on-failure
-WorkingDirectory=/home/${SERVICE_NAME}
+WorkingDirectory=/home/${USER_NAME}
 LimitNOFILE=1000000
 KillSignal=SIGTERM
 TimeoutStopSec=600

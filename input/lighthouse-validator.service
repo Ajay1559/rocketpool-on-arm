@@ -3,11 +3,11 @@
  After=network.target
 
  [Service]
- EnvironmentFile=/etc/ethereum/${SERVICE_NAME}@%i
+ EnvironmentFile=/etc/ethereum/${CLIENT_NAME}@%i
  EnvironmentFile=/home/%i/data/validators/rp-fee-recipient-env.txt
  ExecStart=/usr/bin/lighthouse \$ARGS --suggested-fee-recipient \${FEE_RECIPIENT}
  Restart=always
- User=${SERVICE_NAME}
+ User=${USER_NAME}
 
  [Install]
  WantedBy=multi-user.target

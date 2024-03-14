@@ -3,10 +3,10 @@ Description=Nimbus Beacon chain daemon
 After=network.target
 
 [Service]
-EnvironmentFile=${CONF_FOLDER}/${SERVICE_NAME}.conf
+EnvironmentFile=${CONF_FOLDER}/${CLIENT_NAME}.conf
 ExecStart=/usr/bin/nimbus_beacon_node \$ARGS
 Restart=always
-User=${SERVICE_NAME}
+User=${USER_NAME}
 
 [Install]
 WantedBy=multi-user.target
