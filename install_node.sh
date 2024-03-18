@@ -166,7 +166,7 @@ elif [ $DELETE ]; then
     # del sandbox user
     echo "deleting $user_name"
     sudo userdel $user_name
-    sudo rm -rf /home/$user_name/ ${CONF_FOLDER}/${client_name}.conf ${SERVICE_FOLDER}${client_name}.service
+    sudo rm -rf /home/$user_name/ ${CONF_FOLDER}/${user_name}.conf ${SERVICE_FOLDER}${user_name}.service
 fi
 
 sudo systemctl daemon-reload
